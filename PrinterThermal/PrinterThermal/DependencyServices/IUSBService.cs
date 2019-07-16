@@ -7,5 +7,7 @@
 
         void ConnectAndSend(int productId, int vendorId);
 
+        void CreateConnection();
+
     }
 }

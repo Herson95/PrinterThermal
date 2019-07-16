@@ -16,15 +16,13 @@ namespace PrinterThermal.Droid.DependencyServices
 
     public class AndroidUSBService : IUSBService
     {
-        protected static string ACTION_USB_PERMISSION = "android.hardware.usb.action.USB_PERMISSION";
-        private UsbManager mUsbManager;
-        public static UsbDevice mDevice;
+        protected string ACTION_USB_PERMISSION = "android.hardware.usb.action.USB_PERMISSION";
+        private UsbDevice mDevice;
         UsbDeviceConnection connection;
         //Para una impresora ticketera que imprime a 40 columnas. La variable cortar cortara el texto cuando rebase el limte.
         private int maxCar = 40;
         private int cortar;
         private int Default = 0;
-        private PendingIntent pi;
 
         public List<byte> OutputList { get; set; } = new List<byte>();
 
@@ -34,11 +32,11 @@ namespace PrinterThermal.Droid.DependencyServices
         
             try
             {
-                UsbManager manager = (UsbManager)MainActivity.Context.GetSystemService(Context.UsbService);
+                //MainActivity.UsbManager = (UsbManager)MainActivity.Context.GetSystemService(Context.UsbService);
 
-                if (manager.DeviceList.Count != 0)
+                if (MainActivity.UsbManager.DeviceList.Count != 0)
                 {
-                    foreach (UsbDevice device in manager.DeviceList.Values)
+                    foreach (UsbDevice device in MainActivity.UsbManager.DeviceList.Values)
                     {
                         lista.Add($"USB:{device.SerialNumber}-{device.DeviceId}-{device.DeviceName}-{device.DeviceProtocol}-{device.ProductName} " +
                             $"{device.ProductId} {device.VendorId}");
@@ -57,10 +55,10 @@ namespace PrinterThermal.Droid.DependencyServices
         public void ConnectAndSend(int productId, int vendorId)
         {
             OutputList = new List<byte>();
-            mUsbManager = (UsbManager)MainActivity.Context.GetSystemService(Context.UsbService);
+            //MainActivity.UsbManager = (UsbManager)MainActivity.Context.GetSystemService(Context.UsbService);
 
-            var matchingDevice = mUsbManager.DeviceList.FirstOrDefault(item => item.Value.VendorId == productId && item.Value.VendorId == 5455);
-            if (mUsbManager.DeviceList.Count == 0)
+            var matchingDevice = MainActivity.UsbManager.DeviceList.FirstOrDefault(item => item.Value.VendorId == productId && item.Value.VendorId == 5455);
+            if (MainActivity.UsbManager.DeviceList.Count == 0)
                 throw new Exception("Ningún dispositivo conectado al USB");
             if (matchingDevice.Value == null)
                 throw new Exception("Dispositivo no encontrado, intente configurarlo");
@@ -68,14 +66,12 @@ namespace PrinterThermal.Droid.DependencyServices
             var usbPort = matchingDevice.Key;
             mDevice = matchingDevice.Value;
 
-            if (!mUsbManager.HasPermission(mDevice))
+            if (!MainActivity.UsbManager.HasPermission(mDevice))
             {
                 try
                 {
-                    //pi = PendingIntent.GetBroadcast(MainActivity.Context, 0, new Intent(ACTION_USB_PERMISSION), 0);
-                    //mUsbManager.RequestPermission(mDevice, pi);
-                    CreateConnection();
-                    //throw new Exception("Connetado, intente de nuevo");
+                    MainActivity.UsbManager.RequestPermission(mDevice, MainActivity.PendingIntent);
+                    throw new Exception("Connetado, intente de nuevo");
                 }
                 catch (Exception ex)
                 {
@@ -83,74 +79,66 @@ namespace PrinterThermal.Droid.DependencyServices
                 }
             }
 
-                connection = null;
-                try
+            connection = null;
+            try
+            {
+                connection = MainActivity.UsbManager.OpenDevice(mDevice);
+
+                using (var usbInterface = mDevice.GetInterface(0))
                 {
-                    connection = mUsbManager.OpenDevice(mDevice);
 
-                    using (var usbInterface = mDevice.GetInterface(0))
+                    using (var usbEndpoint = usbInterface.GetEndpoint(0))
                     {
+                        connection.ClaimInterface(usbInterface, true);
+                        EscInit();
+                        SetFont(Default);
+                        SetJustification(1);
+                        SetBold(true);
+                        StoreString("Pay Out\n\n");
+                        SetBold(false);
+                        SetJustification(0);
+                        LineasGuion();
+                        TextoExtremos($"Station 5", $"Caja 2");
+                        TextoExtremos($"Cashier Name:", $"Victor");
+                        TextoExtremos($"Bank Report #:", $"1234");
+                        LineasGuion();
+                        TextoExtremos($"Pay Out To:", $"Marvin");
+                        TextoExtremos($"Issued By Employee:", $"Herson");
+                        StoreString("Pay out Details :\n");
+                        StoreString($"    Venta de celular\n\n");
+                        TextoExtremos($"Pay Out Amount:", $"500.00");
+                        Feed(4);
+                        SetJustification(1);
+                        StoreString("x: _____________________________");
+                        Feed(1);
+                        StoreString($"{DateTime.UtcNow.ToLocalTime()}");
+                        PrintStorage();
 
+                        FeedAndCut(5);
+                        connection.BulkTransfer(usbEndpoint, OutputList.ToArray(), OutputList.ToArray().Length, 0);
 
-                        using (var usbEndpoint = usbInterface.GetEndpoint(0))
-                        {
-                            connection.ClaimInterface(usbInterface, true);
-                            EscInit();
-                            SetFont(Default);
-                            SetJustification(1);
-                            SetBold(true);
-                            StoreString("Pay Out\n\n");
-                            SetBold(false);
-                            SetJustification(0);
-                            LineasGuion();
-                            TextoExtremos($"Station 5", $"Caja 2");
-                            TextoExtremos($"Cashier Name:", $"Victor");
-                            TextoExtremos($"Bank Report #:", $"1234");
-                            LineasGuion();
-                            TextoExtremos($"Pay Out To:", $"Marvin");
-                            TextoExtremos($"Issued By Employee:", $"Herson");
-                            StoreString("Pay out Details :\n");
-                            StoreString($"    Venta de celular\n\n");
-                            TextoExtremos($"Pay Out Amount:", $"500.00");
-                            Feed(4);
-                            SetJustification(1);
-                            StoreString("x: _____________________________");
-                            Feed(1);
-                            StoreString($"{DateTime.UtcNow.ToLocalTime()}");
-                            PrintStorage();
-
-                            FeedAndCut(5);
-                            connection.BulkTransfer(usbEndpoint, OutputList.ToArray(), OutputList.ToArray().Length, 0);
-
-                        }
                     }
                 }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Data.Keys + " " + ex.Message);
-                }
-                finally
-                {
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
 
-                    // Close the connection
-                    if (connection != null)
-                    {
-                        OutputList = new List<byte>();
-                        connection.Close();
-                    }
+                // Close the connection
+                if (connection != null)
+                {
+                    OutputList = new List<byte>();
+                    connection.Close();
                 }
-          
-      
+            }
         }
 
         public void CreateConnection()
         {
-           
-            pi = PendingIntent.GetBroadcast(MainActivity.Context, 0, new Intent(ACTION_USB_PERMISSION), 0);
-            mUsbManager.RequestPermission(mDevice, pi);
-            pi.NotifyAll();
-            mUsbManager.NotifyAll();
-
+            MainActivity.CreateConnection();
         }
 
         #region Commands ESC

@@ -130,6 +130,7 @@
 
         void BindUsbDeviceList()
         {
+            uSBService.CreateConnection();
             var list = uSBService.GetDeviceList();
             DeviceList.Clear();
             foreach (var item in list)
