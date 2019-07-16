@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.645
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrinterThermal.Android", "PrinterThermal\PrinterThermal.Android\PrinterThermal.Android.csproj", "{84A597FB-ED94-4302-8316-E70F1C085883}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrinterThermal", "PrinterThermal\PrinterThermal\PrinterThermal.csproj", "{8CB1897B-13B3-48A3-A01A-42D075CCC1B8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{84A597FB-ED94-4302-8316-E70F1C085883}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84A597FB-ED94-4302-8316-E70F1C085883}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84A597FB-ED94-4302-8316-E70F1C085883}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{84A597FB-ED94-4302-8316-E70F1C085883}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84A597FB-ED94-4302-8316-E70F1C085883}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84A597FB-ED94-4302-8316-E70F1C085883}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{8CB1897B-13B3-48A3-A01A-42D075CCC1B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CB1897B-13B3-48A3-A01A-42D075CCC1B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CB1897B-13B3-48A3-A01A-42D075CCC1B8}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{8CB1897B-13B3-48A3-A01A-42D075CCC1B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CB1897B-13B3-48A3-A01A-42D075CCC1B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CB1897B-13B3-48A3-A01A-42D075CCC1B8}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2BBDFA5D-E6AD-4C8E-9DB4-31CBD56E9B24}
+	EndGlobalSection
+EndGlobal
