@@ -42,7 +42,7 @@ namespace PrinterThermal.Droid.DependencyServices
                 if (type == "1")
                 {
                     Socket = new Socket();
-                    await Socket.ConnectAsync(new InetSocketAddress(ip, port), 1000);
+                    await Socket?.ConnectAsync(new InetSocketAddress(ip, port), 1000);
                     pw = new PrintWriter(Socket.OutputStream, true);
                 }
                 else if (type == "2")
@@ -52,10 +52,14 @@ namespace PrinterThermal.Droid.DependencyServices
                     var device = (from bd in bluetoothAdapter?.BondedDevices
                                   where bd?.Address == address
                                   select bd).FirstOrDefault();
+                    if (device==null)
+                    {
+                        throw new Exception("Bluetooth without connection");
+                    }
                     BluetoothSocket = device?.
                         CreateRfcommSocketToServiceRecord(
                         UUID.FromString("00001101-0000-1000-8000-00805f9b34fb"));
-                    await BluetoothSocket.ConnectAsync();
+                    await BluetoothSocket?.ConnectAsync();
                     pw = new PrintWriter(BluetoothSocket.OutputStream, true);
                 }
                 else
