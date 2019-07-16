@@ -38,8 +38,7 @@ namespace PrinterThermal.Droid.DependencyServices
                 {
                     foreach (UsbDevice device in MainActivity.UsbManager.DeviceList.Values)
                     {
-                        lista.Add($"USB:{device.SerialNumber}-{device.DeviceId}-{device.DeviceName}-{device.DeviceProtocol}-{device.ProductName} " +
-                            $"{device.ProductId} {device.VendorId}");
+                        lista.Add($"{device.ProductId} {device.VendorId}");
                     }
                 }
 
@@ -57,11 +56,11 @@ namespace PrinterThermal.Droid.DependencyServices
             OutputList = new List<byte>();
             //MainActivity.UsbManager = (UsbManager)MainActivity.Context.GetSystemService(Context.UsbService);
 
-            var matchingDevice = MainActivity.UsbManager.DeviceList.FirstOrDefault(item => item.Value.VendorId == productId && item.Value.VendorId == 5455);
+            var matchingDevice = MainActivity.UsbManager.DeviceList.FirstOrDefault(item => item.Value.ProductId == productId && item.Value.VendorId == vendorId);
             if (MainActivity.UsbManager.DeviceList.Count == 0)
-                throw new Exception("Ningún dispositivo conectado al USB");
+                throw new Exception("No device connected to the USB.");
             if (matchingDevice.Value == null)
-                throw new Exception("Dispositivo no encontrado, intente configurarlo");
+                throw new Exception("Device not found, try to configure it.");
 
             var usbPort = matchingDevice.Key;
             mDevice = matchingDevice.Value;
@@ -71,7 +70,7 @@ namespace PrinterThermal.Droid.DependencyServices
                 try
                 {
                     MainActivity.UsbManager.RequestPermission(mDevice, MainActivity.PendingIntent);
-                    throw new Exception("Connetado, intente de nuevo");
+                    throw new Exception("Restart printing.");
                 }
                 catch (Exception ex)
                 {
@@ -114,7 +113,7 @@ namespace PrinterThermal.Droid.DependencyServices
                         StoreString($"{DateTime.UtcNow.ToLocalTime()}");
                         PrintStorage();
 
-                        FeedAndCut(5);
+                        //FeedAndCut(5);
                         connection.BulkTransfer(usbEndpoint, OutputList.ToArray(), OutputList.ToArray().Length, 0);
 
                     }

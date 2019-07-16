@@ -100,8 +100,8 @@
                 if (type=="3")
                 {
                     var c = SelectedDevice.Split(' ');
-                    var vendorID = int.Parse(c[1]);
-                    var productID = int.Parse(c[2]);
+                    var vendorID = int.Parse(c[0]);
+                    var productID = int.Parse(c[1]);
                     uSBService.ConnectAndSend(productID,vendorID);
                     return;
                 }
