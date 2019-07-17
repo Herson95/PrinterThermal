@@ -9,6 +9,7 @@
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             int num = 0;
+            
             var values = value.ToString();
             var splits = values.Split(' ');
             bool canConvert = int.TryParse(splits[0], out num);

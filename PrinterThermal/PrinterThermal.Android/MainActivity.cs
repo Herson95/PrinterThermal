@@ -8,6 +8,9 @@ using Android.Widget;
 using Android.OS;
 using Android.Content;
 using Android.Hardware.Usb;
+using Android;
+using PrinterThermal.Droid.DependencyServices;
+using Android.Bluetooth;
 
 namespace PrinterThermal.Droid
 {
@@ -20,8 +23,14 @@ namespace PrinterThermal.Droid
         public static UsbManager UsbManager { get;  set; }
         public static UsbDevice UsbDevice { get;  set; }
         public static PendingIntent PendingIntent { get;  set; }
-       
 
+        private const int LocationPermissionsRequestCode = 1000;
+
+        private static readonly string[] LocationPermissions =
+        {
+            Manifest.Permission.AccessCoarseLocation,
+            Manifest.Permission.AccessFineLocation
+        };
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -32,6 +41,16 @@ namespace PrinterThermal.Droid
             UsbManager = (UsbManager)Context.GetSystemService(UsbService);
             PendingIntent = PendingIntent.GetBroadcast(Context, 0, new Intent(ACTION_USB_PERMISSION), 0);
 
+            var coarseLocationPermissionGranted =
+                CheckSelfPermission(Manifest.Permission.AccessCoarseLocation);
+            var fineLocationPermissionGranted =
+               CheckSelfPermission(Manifest.Permission.AccessFineLocation);
+
+            if (coarseLocationPermissionGranted != Permission.Denied ||
+                fineLocationPermissionGranted == Permission.Denied)
+                RequestPermissions(LocationPermissions, LocationPermissionsRequestCode);
+
+          
             base.OnCreate(savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());

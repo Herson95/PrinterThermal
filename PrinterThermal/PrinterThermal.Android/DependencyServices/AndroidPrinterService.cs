@@ -47,6 +47,7 @@ namespace PrinterThermal.Droid.DependencyServices
                 }
                 else if (type == "2")
                 {
+                  
                     var address = addressBluetooth.Split(" ").LastOrDefault();
                     var bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
                     var device = (from bd in bluetoothAdapter?.BondedDevices

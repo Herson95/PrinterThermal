@@ -12,7 +12,9 @@
         <viewmodels:PrinterPageViewModel />
     </ContentPage.BindingContext>
     <ContentPage.Content>
+
         <StackLayout>
+
             <Picker
                 Title="Select Connecion"
                 ItemDisplayBinding="{Binding .}"
@@ -23,7 +25,44 @@
                 ItemDisplayBinding="{Binding ., Converter={StaticResource IntToHexString}}"
                 ItemsSource="{Binding DeviceList}"
                 SelectedItem="{Binding SelectedDevice}" />
+
+            <Picker
+                Title="Select Device No Paired"
+                IsEnabled="{Binding IsEnabled}"
+                IsVisible="{Binding IsEnabled}"
+                ItemDisplayBinding="{Binding ., Converter={StaticResource IntToHexString}}"
+                ItemsSource="{Binding DeviceListNoPaired}"
+                SelectedItem="{Binding SelectedDevice}" />
             <Button Command="{Binding PrintCommand}" Text="Print" />
+            <ActivityIndicator IsRunning="{Binding IsBusy, Mode=TwoWay}" IsVisible="{Binding IsBusy, Mode=TwoWay}" />
+            <!--<ListView ItemsSource="{Binding DeviceList}" SelectedItem="{Binding SelectedDevice}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="45" />
+                            </Grid.RowDefinitions>
+                            <Label Text="{Binding ., Converter={StaticResource IntToHexString}}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Label Text="Device No Paired" />
+            <ListView
+                IsRefreshing="{Binding IsBusy}"
+                ItemsSource="{Binding DeviceListNoPaired}"
+                SelectedItem="{Binding SelectedDevice}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="45" />
+                            </Grid.RowDefinitions>
+                            <Label Text="{Binding ., Converter={StaticResource IntToHexString}}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>-->
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

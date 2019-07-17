@@ -28,6 +28,34 @@
             }
         }
 
+        private IList<string> _deviceListNoPaired;
+        public IList<string> DeviceListNoPaired
+        {
+            get
+            {
+                if (_deviceListNoPaired == null)
+                    _deviceListNoPaired = new ObservableCollection<string>();
+                return _deviceListNoPaired;
+            }
+            set
+            {
+                SetProperty(ref _deviceListNoPaired, value);
+            }
+        }
+
+        private bool isEnabled;
+        public bool IsEnabled
+        {
+            get
+            {
+                return isEnabled;
+            }
+            set
+            {
+                SetProperty(ref isEnabled, value);
+            }
+        }
+
 
         public ObservableCollection<string> ConnectionList => new ObservableCollection<string>
         {
@@ -120,21 +148,32 @@
             uSBService = DependencyService.Get<IUSBService>();
         }
 
-        void BindDeviceList()
+        private async void BindDeviceList()
         {
-            var list = _blueToothService.GetDeviceList();
-            DeviceList.Clear();
-            foreach (var item in list)
-                DeviceList.Add(item);
+
+            IsBusy = true;
+            IsEnabled = false;
+            var list = _blueToothService.GetPairedDevice();
+            DeviceList = new List<string>(list);
+            await _blueToothService.ScanDeviceNoPaired();
+            var list2 = _blueToothService.GetNoPairedDevice();
+            DeviceListNoPaired = new List<string>(list2);
+            if (DeviceListNoPaired.Count>0)
+            {
+                IsEnabled = true;
+            }
+            IsBusy = false;
+            
         }
 
-        void BindUsbDeviceList()
+        private void BindUsbDeviceList()
         {
+            IsBusy = true;
+            IsEnabled = false;
             uSBService.CreateConnection();
             var list = uSBService.GetDeviceList();
-            DeviceList.Clear();
-            foreach (var item in list)
-                DeviceList.Add(item);
+            DeviceList = new List<string>(list);
+            IsBusy = false;
         }
     }
 }
