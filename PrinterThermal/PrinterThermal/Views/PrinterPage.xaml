@@ -65,7 +65,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="45" />
                                 </Grid.RowDefinitions>
-                                <Label Text="{Binding , Converter={StaticResource IntToHexString}}" VerticalOptions="Center" />
+                                <Label Text="{Binding DisplayName, Converter={StaticResource IntToHexString}}" VerticalOptions="Center" />
                             </Grid>
                         </ViewCell>
 
@@ -91,7 +91,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="45" />
                                 </Grid.RowDefinitions>
-                                <Label Text="{Binding , Converter={StaticResource IntToHexString}}" VerticalOptions="Center" />
+                                <Label Text="{Binding DisplayName, Converter={StaticResource IntToHexString}}" VerticalOptions="Center" />
                             </Grid>
                         </ViewCell>
                     </DataTemplate>

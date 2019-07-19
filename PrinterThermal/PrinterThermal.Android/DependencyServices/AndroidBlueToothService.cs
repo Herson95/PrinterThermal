@@ -22,7 +22,7 @@ namespace PrinterThermal.Droid.DependencyServices
         public static List<string> Devices { get; set; } = new List<string>();
         public static List<BluetoothDevice> DevicesBluetooth { get; set; }
         private bool _isReceiveredRegistered;
-        private BluetoothDeviceReceiver _receiver;
+        private BluetoothDeviceReceiver _receiver = new BluetoothDeviceReceiver();
 
         public async Task<IList<string>> GetPairedDevice()
         {
@@ -83,7 +83,7 @@ namespace PrinterThermal.Droid.DependencyServices
 
         public async Task<bool> ScanDeviceNoPaired()
         {
-            _receiver = new BluetoothDeviceReceiver();
+           
             RegisterBluetoothReceiver();
             StartScanning();
             do

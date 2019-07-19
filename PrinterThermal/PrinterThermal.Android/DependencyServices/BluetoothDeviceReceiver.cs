@@ -7,6 +7,7 @@ using PrinterThermal.DependencyServices;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
@@ -31,9 +32,22 @@ namespace PrinterThermal.Droid.DependencyServices
                     // Only update the adapter with items which are not bonded
                     if (device.BondState != Bond.Bonded)
                     {
-                        Devices.Add($"{device.Name} {device.Address}");
-                        DevicesBluetooth.Add(device);
-                        Toast.MakeText(MainActivity.Context, $"{device.Name} {device.Address}", ToastLength.Long).Show();
+                        if (Devices.Count>0)
+                        {
+                            if (!DevicesBluetooth.Any(x=>x.Address == device.Address))
+                            {
+                                Devices.Add($"{device.Name} {device.Address}");
+                                DevicesBluetooth.Add(device);
+                                Toast.MakeText(MainActivity.Context, $"{device.Name} {device.Address}", ToastLength.Long).Show();
+                            }
+                        }
+                        else
+                        {
+                            Devices.Add($"{device.Name} {device.Address}");
+                            DevicesBluetooth.Add(device);
+                            Toast.MakeText(MainActivity.Context, $"{device.Name} {device.Address}", ToastLength.Long).Show();
+                        }
+                       
                     }
 
                     break;
