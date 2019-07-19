@@ -4,6 +4,7 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Threading.Tasks;
     using System.Windows.Input;
     using Xamarin.Forms;
 
@@ -56,6 +57,19 @@
             }
         }
 
+        private bool isEnabledButtons;
+        public bool IsEnabledButtons
+        {
+            get
+            {
+                return isEnabledButtons;
+            }
+            set
+            {
+                SetProperty(ref isEnabledButtons, value);
+            }
+        }
+
 
         public ObservableCollection<string> ConnectionList => new ObservableCollection<string>
         {
@@ -77,29 +91,20 @@
                 {
                     return;
                 }
-                if (SelectedConnection == "USB")
-                {
-                    BindUsbDeviceList();
-                    type = "3";
-                }
-                else
-                {
-                    BindDeviceList();
-                    type = "2";
-                }
+                
             }
         }
 
-        private string _printMessage;
-        public string PrintMessage
+        private string _selectedDeviceNoPaired;
+        public string SelectedDeviceNoPaired
         {
             get
             {
-                return _printMessage;
+                return _selectedDeviceNoPaired;
             }
             set
             {
-                SetProperty(ref _printMessage, value);
+                SetProperty(ref _selectedDeviceNoPaired, value);
             }
         }
 
@@ -116,57 +121,75 @@
             }
         }
 
-        public ICommand PrintCommand => new Command(async () =>
-        {
-            try
-            {
-                var printer = DependencyService.Get<IPrinterService>();
-                if (string.IsNullOrEmpty(SelectedDevice))
-                {
-                    return;
-                }
-                if (type=="3")
-                {
-                    var c = SelectedDevice.Split(' ');
-                    var vendorID = int.Parse(c[0]);
-                    var productID = int.Parse(c[1]);
-                    uSBService.ConnectAndSend(productID,vendorID);
-                    return;
-                }
-                await printer.Test("", 9100, SelectedDevice, 0, type);
-            }
-            catch (Exception ex)
-            {
-                await Application.Current.MainPage.DisplayAlert("Alert", ex.Message, "Ok");
-            }
-
-        });
+        public ICommand PrintCommand { get; set; }
 
         public PrinterPageViewModel()
         {
+            IsEnabledButtons = true;
             _blueToothService = DependencyService.Get<IBlueToothService>();
             uSBService = DependencyService.Get<IUSBService>();
+            PrintCommand = new Command<string>(Operation);
         }
 
-        private async void BindDeviceList()
+        private void Operation(string obj)
         {
-
-            IsBusy = true;
-            IsEnabled = false;
-            var list = _blueToothService.GetPairedDevice();
-            DeviceList = new List<string>(list);
-            await _blueToothService.ScanDeviceNoPaired();
-            var list2 = _blueToothService.GetNoPairedDevice();
-            DeviceListNoPaired = new List<string>(list2);
-            if (DeviceListNoPaired.Count>0)
+            IsEnabledButtons = false;
+            if (obj.Equals("Scan"))
             {
-                IsEnabled = true;
+                ScanDevice();
             }
-            IsBusy = false;
-            
+            else if (obj.Equals("Paired"))
+            {
+                Paired();
+            }
+            else
+            {
+                Print();
+            }
+           
         }
 
-        private void BindUsbDeviceList()
+        private async Task DevicesBluetoothPaired()
+        {
+            try
+            {
+                IsBusy = true;
+                IsEnabled = true;
+                var list = await _blueToothService.GetPairedDevice();
+                DeviceList = new List<string>(list);
+                IsBusy = false;
+                IsEnabledButtons = true;
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Alert", ex.Message,"OK");
+                IsBusy = false;
+                IsEnabledButtons = true;
+            }
+        }
+
+        private async Task DevicesBluetoothNoPaired()
+        {
+            try
+            {
+                IsBusy = true;
+                IsEnabled = true;
+                IsEnabledButtons = false;
+                await _blueToothService.ScanDeviceNoPaired();
+                var list2 = _blueToothService.GetNoPairedDevice();
+                DeviceListNoPaired = new List<string>(list2);
+                IsBusy = false;
+                IsEnabledButtons = true;
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Alert", ex.Message, "OK");
+                IsBusy = false;
+                IsEnabledButtons = true;
+            }
+        }
+
+        private void DevicesUSB()
         {
             IsBusy = true;
             IsEnabled = false;
@@ -174,6 +197,76 @@
             var list = uSBService.GetDeviceList();
             DeviceList = new List<string>(list);
             IsBusy = false;
+            IsEnabledButtons = true;
+        }
+
+        private async void ScanDevice()
+        {
+            if (string.IsNullOrEmpty(SelectedConnection))
+            {
+                await Application.Current.MainPage.DisplayAlert("Alert", "Please select connection type.", "Ok");
+                IsEnabledButtons = true;
+                return;
+            }
+            if (SelectedConnection == "USB")
+            {
+                DevicesUSB();
+                type = "3";
+            }
+            else
+            {
+                await DevicesBluetoothPaired();
+                await DevicesBluetoothNoPaired(); 
+                type = "2";
+            }
+        }
+
+        private async void Print()
+        {
+            try
+            {
+                var printer = DependencyService.Get<IPrinterService>();
+                if (string.IsNullOrEmpty(SelectedDevice))
+                {
+                    IsEnabledButtons = true;
+                    return;
+                }
+                if (type == "3")
+                {
+                    var c = SelectedDevice.Split(' ');
+                    var vendorID = int.Parse(c[0]);
+                    var productID = int.Parse(c[1]);
+                    uSBService.ConnectAndSend(productID, vendorID);
+                    IsEnabledButtons = true;
+                    return;
+                }
+                await printer.Test("", 9100, SelectedDevice, 0, type);
+                IsEnabledButtons = true;
+            }
+            catch (Exception ex)
+            {
+                IsEnabledButtons = true;
+                await Application.Current.MainPage.DisplayAlert("Alert", ex.Message, "Ok");
+            }
+        }
+
+        private async void Paired()
+        {
+            if (string.IsNullOrEmpty(SelectedDeviceNoPaired))
+            {
+                await Application.Current.MainPage.DisplayAlert("Alert", "Select device no paired", "Ok");
+                IsEnabledButtons = true;
+                return;
+            }
+            IsBusy = true;
+            var response= await _blueToothService.PairedDevice(SelectedDeviceNoPaired);
+            if (response)
+            {
+               await DevicesBluetoothNoPaired();
+               await DevicesBluetoothPaired();
+            }
+            IsBusy = false;
+            IsEnabledButtons = true;
         }
     }
 }

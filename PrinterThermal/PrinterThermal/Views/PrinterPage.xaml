@@ -4,9 +4,15 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:converters="clr-namespace:PrinterThermal.Converters"
-    xmlns:viewmodels="clr-namespace:PrinterThermal.ViewModels">
+    xmlns:viewmodels="clr-namespace:PrinterThermal.ViewModels"
+    Title="Printer"
+    NavigationPage.HasBackButton="True">
     <ContentPage.Resources>
         <converters:IntToHexStringConverter x:Key="IntToHexString" />
+        <Style x:Key="buttonStyle" TargetType="Button">
+            <Setter Property="IsEnabled" Value="{Binding IsEnabledButtons, Mode=TwoWay}" />
+        </Style>
+
     </ContentPage.Resources>
     <ContentPage.BindingContext>
         <viewmodels:PrinterPageViewModel />
@@ -14,55 +20,84 @@
     <ContentPage.Content>
 
         <StackLayout>
-
             <Picker
                 Title="Select Connecion"
                 ItemDisplayBinding="{Binding .}"
                 ItemsSource="{Binding ConnectionList}"
                 SelectedItem="{Binding SelectedConnection}" />
-            <Picker
-                Title="Select Device"
-                ItemDisplayBinding="{Binding ., Converter={StaticResource IntToHexString}}"
-                ItemsSource="{Binding DeviceList}"
-                SelectedItem="{Binding SelectedDevice}" />
+            <StackLayout
+                HorizontalOptions="Center"
+                Orientation="Horizontal"
+                VerticalOptions="Center">
+                <Button
+                    BackgroundColor="Green"
+                    Command="{Binding PrintCommand}"
+                    CommandParameter="Scan"
+                    Style="{StaticResource buttonStyle}"
+                    Text="Scan"
+                    TextColor="White" />
+                <Button
+                    BackgroundColor="Green"
+                    Command="{Binding PrintCommand}"
+                    CommandParameter="Paired"
+                    Style="{StaticResource buttonStyle}"
+                    Text="Paired"
+                    TextColor="White" />
+                <Button
+                    BackgroundColor="Green"
+                    Command="{Binding PrintCommand}"
+                    CommandParameter="Print"
+                    Style="{StaticResource buttonStyle}"
+                    Text="Print"
+                    TextColor="White" />
+            </StackLayout>
 
-            <Picker
-                Title="Select Device No Paired"
-                IsEnabled="{Binding IsEnabled}"
-                IsVisible="{Binding IsEnabled}"
-                ItemDisplayBinding="{Binding ., Converter={StaticResource IntToHexString}}"
-                ItemsSource="{Binding DeviceListNoPaired}"
-                SelectedItem="{Binding SelectedDevice}" />
-            <Button Command="{Binding PrintCommand}" Text="Print" />
-            <ActivityIndicator IsRunning="{Binding IsBusy, Mode=TwoWay}" IsVisible="{Binding IsBusy, Mode=TwoWay}" />
-            <!--<ListView ItemsSource="{Binding DeviceList}" SelectedItem="{Binding SelectedDevice}">
+            <Label
+                BackgroundColor="DodgerBlue"
+                FontSize="Medium"
+                Text="Device Paired"
+                TextColor="White" />
+            <ListView ItemsSource="{Binding DeviceList}" SelectedItem="{Binding SelectedDevice}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="45" />
-                            </Grid.RowDefinitions>
-                            <Label Text="{Binding ., Converter={StaticResource IntToHexString}}" />
-                        </Grid>
+                        <ViewCell>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="45" />
+                                </Grid.RowDefinitions>
+                                <Label Text="{Binding , Converter={StaticResource IntToHexString}}" VerticalOptions="Center" />
+                            </Grid>
+                        </ViewCell>
+
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Label Text="Device No Paired" />
+            <Label
+                BackgroundColor="Red"
+                FontSize="Medium"
+                IsVisible="{Binding IsEnabled}"
+                Text="Device No Paired"
+                TextColor="White" />
             <ListView
+                IsEnabled="{Binding IsEnabled}"
                 IsRefreshing="{Binding IsBusy}"
+                IsVisible="{Binding IsEnabled}"
                 ItemsSource="{Binding DeviceListNoPaired}"
-                SelectedItem="{Binding SelectedDevice}">
+                SelectedItem="{Binding SelectedDeviceNoPaired}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="45" />
-                            </Grid.RowDefinitions>
-                            <Label Text="{Binding ., Converter={StaticResource IntToHexString}}" />
-                        </Grid>
+                        <ViewCell>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="45" />
+                                </Grid.RowDefinitions>
+                                <Label Text="{Binding , Converter={StaticResource IntToHexString}}" VerticalOptions="Center" />
+                            </Grid>
+                        </ViewCell>
                     </DataTemplate>
                 </ListView.ItemTemplate>
-            </ListView>-->
+            </ListView>
         </StackLayout>
+
     </ContentPage.Content>
 </ContentPage>

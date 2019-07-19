@@ -13,29 +13,33 @@ namespace PrinterThermal.Droid.DependencyServices
     using Android.Bluetooth;
     using Android.Content;
     using Android.Widget;
+    using Java.Util;
     using PrinterThermal.DependencyServices;
 
     public class AndroidBlueToothService : IBlueToothService
     {
+        public static UUID UUID = UUID.FromString("00001101-0000-1000-8000-00805f9b34fb");
         public static List<string> Devices { get; set; } = new List<string>();
+        public static List<BluetoothDevice> DevicesBluetooth { get; set; }
         private bool _isReceiveredRegistered;
         private BluetoothDeviceReceiver _receiver;
 
-
-        public AndroidBlueToothService()
-        {
-            _receiver = new BluetoothDeviceReceiver();
-
-            //RegisterBluetoothReceiver();
-            //StartScanning();
-        }
-
-        public IList<string> GetPairedDevice()
+        public async Task<IList<string>> GetPairedDevice()
         {
             var devices = new List<string>();
             // Register for broadcasts when a device is discovered
             using (BluetoothAdapter bluetoothAdapter = BluetoothAdapter.DefaultAdapter)
             {
+                if (!bluetoothAdapter.IsEnabled)
+                {
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ActionRequestEnable);
+                    MainActivity.Context.StartActivity(enableBtIntent);
+                    await Task.Delay(5000);
+                    if (!bluetoothAdapter.IsEnabled)
+                    {
+                        return devices;
+                    }
+                }
                 if (bluetoothAdapter != null)
                 {
                     devices = bluetoothAdapter?.BondedDevices.Select(i => i.Name + " " + i.Address).ToList();
@@ -46,19 +50,6 @@ namespace PrinterThermal.Droid.DependencyServices
 
         }
 
-        public static IList<string> GetDeviceLis(string device = "")
-        {
-
-            var devices = new List<string>();
-            
-            if (device != "")
-            {
-                devices.Add(device);
-            }
-            Devices = new List<string>(devices);
-            return devices;
-
-        }
 
         private static void StartScanning()
         {
@@ -92,27 +83,42 @@ namespace PrinterThermal.Droid.DependencyServices
 
         public async Task<bool> ScanDeviceNoPaired()
         {
+            _receiver = new BluetoothDeviceReceiver();
             RegisterBluetoothReceiver();
             StartScanning();
-
-            await Task.Delay(8000);
-
-            if (!BluetoothDeviceReceiver.Adapter.IsDiscovering)
+            do
             {
-                return true;
-            }
-            else
-            {
-                await ScanDeviceNoPaired();
-            }
+                await Task.Delay(1000);
+            } while (BluetoothDeviceReceiver.Adapter.IsDiscovering);
 
-            return false;
+            return true;
+           
         }
 
         public IList<string> GetNoPairedDevice()
         {
-            Toast.MakeText(MainActivity.Context, "Scanning Finished...", ToastLength.Long).Show();
             return Devices;
+        }
+
+        public async Task<bool> PairedDevice(string deviceAddress)
+        {
+            bool response = true;
+            var address = deviceAddress.Split(" ").LastOrDefault();
+            var device = (from bd in DevicesBluetooth
+                          where bd?.Address == address
+                          select bd).FirstOrDefault();
+            var BluetoothSocket = device?.CreateRfcommSocketToServiceRecord(UUID);
+            try
+            {
+                await BluetoothSocket?.ConnectAsync();
+                BluetoothSocket.Close();
+                BluetoothSocket.Dispose();
+            }
+            catch
+            {
+                response = false;
+            }
+            return response;
         }
     }
 }

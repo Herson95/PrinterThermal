@@ -28,6 +28,9 @@ namespace PrinterThermal.Droid
 
         private static readonly string[] LocationPermissions =
         {
+            Manifest.Permission.Bluetooth,
+            Manifest.Permission.BluetoothAdmin,
+            Manifest.Permission.BluetoothPrivileged,
             Manifest.Permission.AccessCoarseLocation,
             Manifest.Permission.AccessFineLocation
         };
@@ -40,17 +43,8 @@ namespace PrinterThermal.Droid
             Context = this;
             UsbManager = (UsbManager)Context.GetSystemService(UsbService);
             PendingIntent = PendingIntent.GetBroadcast(Context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+            CheckPermissions();
 
-            var coarseLocationPermissionGranted =
-                CheckSelfPermission(Manifest.Permission.AccessCoarseLocation);
-            var fineLocationPermissionGranted =
-               CheckSelfPermission(Manifest.Permission.AccessFineLocation);
-
-            if (coarseLocationPermissionGranted != Permission.Denied ||
-                fineLocationPermissionGranted == Permission.Denied)
-                RequestPermissions(LocationPermissions, LocationPermissionsRequestCode);
-
-          
             base.OnCreate(savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
@@ -65,6 +59,28 @@ namespace PrinterThermal.Droid
                     UsbManager.RequestPermission(device, PendingIntent);
                 }
             }
+        }
+
+        private void CheckPermissions()
+        {
+            //var coarseLocationPermissionGranted =
+            //   CheckSelfPermission(Manifest.Permission.AccessCoarseLocation);
+            //var fineLocationPermissionGranted =
+            //   CheckSelfPermission(Manifest.Permission.AccessFineLocation);
+
+            //if (coarseLocationPermissionGranted != Permission.Denied ||
+            //    fineLocationPermissionGranted == Permission.Denied)
+            //    RequestPermissions(LocationPermissions, LocationPermissionsRequestCode);
+
+            bool minimumPermissionsGranted = true;
+
+            foreach (string permission in LocationPermissions)
+            {
+                if (CheckSelfPermission(permission) != Permission.Granted) minimumPermissionsGranted = false;
+            }
+
+            // If one of the minimum permissions aren't granted, we request them from the user
+            if (!minimumPermissionsGranted) RequestPermissions(LocationPermissions, 0);
         }
     }
 }

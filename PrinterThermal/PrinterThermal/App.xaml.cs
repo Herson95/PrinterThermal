@@ -12,7 +12,7 @@ namespace PrinterThermal
         {
             InitializeComponent();
 
-            MainPage = new PrinterPage();
+            MainPage = new NavigationPage(new PrinterPage());
         }
 
         protected override void OnStart()

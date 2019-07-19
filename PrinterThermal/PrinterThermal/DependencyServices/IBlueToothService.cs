@@ -5,10 +5,12 @@
 
     public interface IBlueToothService
     {
-       IList<string> GetPairedDevice();
+        Task<IList<string>> GetPairedDevice();
 
        IList<string> GetNoPairedDevice();
 
        Task<bool> ScanDeviceNoPaired();
+
+       Task<bool> PairedDevice(string deviceAddress);
     }
 }

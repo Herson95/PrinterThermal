@@ -24,7 +24,6 @@ namespace PrinterThermal.Droid.DependencyServices
         protected static string ACTION_USB_PERMISSION = "com.printerApp.USB_PERMISSION";
         Socket Socket;
         PrintWriter pw;
-        UsbDeviceConnection DeviceConnection;
 
         //Para una impresora ticketera que imprime a 40 columnas. La variable cortar cortara el texto cuando rebase el limte.
         private int maxCar = 40;
@@ -33,6 +32,7 @@ namespace PrinterThermal.Droid.DependencyServices
 
 
         public BluetoothSocket BluetoothSocket { get; set; }
+        
         #endregion
 
         public async Task Test(string ip, int port, string addressBluetooth, int fontSize = 0, string type = "1")
@@ -50,27 +50,42 @@ namespace PrinterThermal.Droid.DependencyServices
                   
                     var address = addressBluetooth.Split(" ").LastOrDefault();
                     var bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
+                    if (!bluetoothAdapter.IsEnabled)
+                    {
+                        Intent enableBtIntent = new Intent(BluetoothAdapter.ActionRequestEnable);
+                        MainActivity.Context.StartActivity(enableBtIntent);
+                        await Task.Delay(6000);
+                        if (!bluetoothAdapter.IsEnabled)
+                        {
+                            throw new Exception("Bluetooth adapter is not enabled.");
+                        }
+                       
+                    }
                     var device = (from bd in bluetoothAdapter?.BondedDevices
                                   where bd?.Address == address
                                   select bd).FirstOrDefault();
+
                     if (device==null)
                     {
                         throw new Exception("Bluetooth without connection");
                     }
-                    BluetoothSocket = device?.
-                        CreateRfcommSocketToServiceRecord(
-                        UUID.FromString("00001101-0000-1000-8000-00805f9b34fb"));
-                    await BluetoothSocket?.ConnectAsync();
-                    pw = new PrintWriter(BluetoothSocket.OutputStream, true);
+                    else
+                    {
+                        BluetoothSocket = device?.CreateRfcommSocketToServiceRecord(AndroidBlueToothService.UUID);
+                        try
+                        {
+                            await BluetoothSocket?.ConnectAsync();
+                        }
+                        catch
+                        {
+                            throw new Exception("Connection denied.");
+                        }
+                      
+                        pw = new PrintWriter(BluetoothSocket.OutputStream, true);
+                    }
+                   
                 }
-                else
-                {
-                    var usbManager = (UsbManager)Application.Context.GetSystemService(Context.UsbService);
-                    var usb = addressBluetooth.Split(" ");
-                    var vendorId = usb[2];
-                    var productId = usb[1];
 
-                }
                 if (type != "3")
                 {
                     await Task.Run(() =>
