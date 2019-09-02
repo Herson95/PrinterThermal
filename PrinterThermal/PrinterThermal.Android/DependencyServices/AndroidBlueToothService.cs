@@ -18,7 +18,7 @@ namespace PrinterThermal.Droid.DependencyServices
 
     public class AndroidBlueToothService : IBlueToothService
     {
-        public static UUID UUID = UUID.FromString("00001101-0000-1000-8000-00805f9b34fb");
+        public static UUID UUID { get; set; } = UUID.FromString("00001101-0000-1000-8000-00805f9b34fb");
         public static List<string> Devices { get; set; } = new List<string>();
         public static List<BluetoothDevice> DevicesBluetooth { get; set; }
         private bool _isReceiveredRegistered;
@@ -27,7 +27,7 @@ namespace PrinterThermal.Droid.DependencyServices
         public async Task<IList<string>> GetPairedDevice()
         {
             var devices = new List<string>();
-            // Register for broadcasts when a device is discovered
+         
             using (BluetoothAdapter bluetoothAdapter = BluetoothAdapter.DefaultAdapter)
             {
                 if (!bluetoothAdapter.IsEnabled)

@@ -24,7 +24,7 @@ namespace PrinterThermal.Droid
         public static UsbDevice UsbDevice { get;  set; }
         public static PendingIntent PendingIntent { get;  set; }
 
-        private const int LocationPermissionsRequestCode = 1000;
+        //private const int LocationPermissionsRequestCode = 1000;
 
         private static readonly string[] LocationPermissions =
         {
