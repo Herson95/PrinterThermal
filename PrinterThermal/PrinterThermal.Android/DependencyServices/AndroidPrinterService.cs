@@ -17,6 +17,7 @@ namespace PrinterThermal.Droid.DependencyServices
     using Android.App;
     using PrinterThermal.DependencyServices;
     using Android.Content;
+    using Android.Widget;
 
     public class AndroidPrinterService : IPrinterService
     {
@@ -39,55 +40,11 @@ namespace PrinterThermal.Droid.DependencyServices
         {
             try
             {
-                if (type == "1")
+                var isBluetooth = type == "2" ? true : false;
+                if (await ConnectAsync(ip,port,1500,isBluetooth,addressBluetooth))
                 {
-                    Socket = new Socket();
-                    await Socket?.ConnectAsync(new InetSocketAddress(ip, port), 1000);
-                    pw = new PrintWriter(Socket.OutputStream, true);
-                }
-                else if (type == "2")
-                {
-                  
-                    var address = addressBluetooth.Split(" ").LastOrDefault();
-                    var bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
-                    if (!bluetoothAdapter.IsEnabled)
-                    {
-                        Intent enableBtIntent = new Intent(BluetoothAdapter.ActionRequestEnable);
-                        MainActivity.Context.StartActivity(enableBtIntent);
-                        await Task.Delay(6000);
-                        if (!bluetoothAdapter.IsEnabled)
-                        {
-                            throw new Exception("Bluetooth adapter is not enabled.");
-                        }
-                       
-                    }
-                    var device = (from bd in bluetoothAdapter?.BondedDevices
-                                  where bd?.Address == address
-                                  select bd).FirstOrDefault();
-
-                    if (device==null)
-                    {
-                        throw new Exception("Bluetooth without connection");
-                    }
-                    else
-                    {
-                        BluetoothSocket = device?.CreateRfcommSocketToServiceRecord(AndroidBlueToothService.UUID);
-                        try
-                        {
-                            await BluetoothSocket?.ConnectAsync();
-                        }
-                        catch
-                        {
-                            throw new Exception("Connection denied.");
-                        }
-                      
-                        pw = new PrintWriter(BluetoothSocket.OutputStream, true);
-                    }
-                   
-                }
-
-                if (type != "3")
-                {
+                    var OutPutStream = isBluetooth == true ? BluetoothSocket.OutputStream : Socket.OutputStream;
+                    pw = new PrintWriter(OutPutStream, true);
                     await Task.Run(() =>
                     {
 
@@ -105,21 +62,16 @@ namespace PrinterThermal.Droid.DependencyServices
                         pw.Flush();
                         pw.Close();
                         pw.Dispose();
-                        if (type == "1")
-                        {
-                            Socket.Close();
-                            Socket.Dispose();
-                        }
-                        else
-                        {
-                            BluetoothSocket.Close();
-                            BluetoothSocket.Dispose();
-                        }
+
+                        OutPutStream.Close();
+                        OutPutStream.Dispose();
 
                     });
                 }
-
-
+                else
+                {
+                    Toast.MakeText(MainActivity.Context, $"Failed connection", ToastLength.Long).Show();
+                }
             }
             catch (SocketException ex)
             {
@@ -793,7 +745,75 @@ namespace PrinterThermal.Droid.DependencyServices
         }
 
 
+        private async Task<bool> ConnectIpAsync(string host, int port = 9100, int msTimeout = 5000)
+        {
+            return await Task.Run(async () =>
+            {
+                var sockaddr = new InetSocketAddress(host, port);
+                try
+                {
+                    Socket = new Socket();
+                    await Socket.ConnectAsync(sockaddr, msTimeout);
+                    return true;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            });
+        }
 
+        private async Task<bool> ConnectBluetothAsync(string addressBluetooth)
+        {
+            return await Task.Run(async () =>
+            {
+                try
+                {
+                    var address = addressBluetooth.Split(" ").LastOrDefault();
+                    var bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
+                    if (!bluetoothAdapter.IsEnabled)
+                    {
+                        //Intent enableBtIntent = new Intent(BluetoothAdapter.ActionRequestEnable);
+                        //MainActivity.Context.StartActivity(enableBtIntent);
+                        //await Task.Delay(6000);
+                        //if (!bluetoothAdapter.IsEnabled)
+                        //{
+                        //    Toast.MakeText(MainActivity.Context, $"Bluetooth adapter is not enabled.", ToastLength.Long).Show();
+                        //}
+                        return false;
+                    }
+                    var device = (from bd in bluetoothAdapter?.BondedDevices
+                                  where bd?.Address == address
+                                  select bd).FirstOrDefault();
+
+                    if (device == null)
+                    {
+                        //Toast.MakeText(MainActivity.Context, $"Bluetooth without connection", ToastLength.Long).Show();
+                        return false;
+                    }
+
+                    BluetoothSocket = device?.CreateRfcommSocketToServiceRecord(AndroidBlueToothService.UUID);
+                    await BluetoothSocket?.ConnectAsync();
+                    return true;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            });
+        }
+
+        private async Task<bool> ConnectAsync(string host, int port = 9100, int msTimeout = 5000,bool isBluetooth = false, string addressBluetooth= "")
+        {
+            return await Task.Run(async () =>
+            {
+                if (isBluetooth)
+                {
+                    return  await ConnectBluetothAsync(addressBluetooth);
+                }
+                return await ConnectIpAsync(host,port,1500);
+            });
+        }
         #endregion
     }
 }
