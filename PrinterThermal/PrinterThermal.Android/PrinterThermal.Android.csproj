@@ -61,6 +61,7 @@
     <Compile Include="DependencyServices\AndroidPrinterService.cs" />
     <Compile Include="DependencyServices\AndroidUSBService.cs" />
     <Compile Include="DependencyServices\BluetoothDeviceReceiver.cs" />
+    <Compile Include="DependencyServices\UsbReceiver.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

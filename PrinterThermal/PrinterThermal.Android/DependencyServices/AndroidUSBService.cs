@@ -51,7 +51,7 @@ namespace PrinterThermal.Droid.DependencyServices
             return lista;
         }
 
-        public void ConnectAndSend(int productId, int vendorId)
+        public async void ConnectAndSend(int productId, int vendorId)
         {
             OutputList = new List<byte>();
             //MainActivity.UsbManager = (UsbManager)MainActivity.Context.GetSystemService(Context.UsbService);
@@ -70,15 +70,17 @@ namespace PrinterThermal.Droid.DependencyServices
                 try
                 {
                     MainActivity.UsbManager.RequestPermission(mDevice, MainActivity.PendingIntent);
-                    throw new Exception("Restart printing.");
+                    connection = MainActivity.UsbManager.OpenDevice(mDevice);
+                    do
+                    {
+                        await Task.Delay(1000);
+                    } while (connection!=null);
                 }
                 catch (Exception ex)
                 {
                     throw new Exception(ex.Message);
                 }
             }
-
-            connection = null;
             try
             {
                 connection = MainActivity.UsbManager.OpenDevice(mDevice);
@@ -137,7 +139,7 @@ namespace PrinterThermal.Droid.DependencyServices
 
         public void CreateConnection()
         {
-            MainActivity.CreateConnection();
+            //MainActivity.CreateConnectionUSB();
         }
 
         #region Commands ESC

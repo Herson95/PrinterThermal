@@ -1,18 +1,11 @@
-﻿
-using Android.Bluetooth;
-using Android.Content;
-using Android.Widget;
-using Java.Util;
-using PrinterThermal.DependencyServices;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Xamarin.Forms;
-
-namespace PrinterThermal.Droid.DependencyServices
+﻿namespace PrinterThermal.Droid.DependencyServices
 {
+    using Android.Bluetooth;
+    using Android.Content;
+    using Android.Widget;
+    using System.Collections.Generic;
+    using System.Linq;
+
     public class BluetoothDeviceReceiver : BroadcastReceiver
     {
         public static BluetoothAdapter Adapter => BluetoothAdapter.DefaultAdapter;

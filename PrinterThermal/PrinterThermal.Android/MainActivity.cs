@@ -17,7 +17,7 @@ namespace PrinterThermal.Droid
     [Activity(Label = "PrinterThermal", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        protected static string ACTION_USB_PERMISSION = "android.hardware.usb.action.USB_PERMISSION";
+        public static string ACTION_USB_PERMISSION = "android.hardware.usb.action.USB_PERMISSION";
 
         public static Context Context { get;  set; }
         public static UsbManager UsbManager { get;  set; }
@@ -41,8 +41,9 @@ namespace PrinterThermal.Droid
             ToolbarResource = Resource.Layout.Toolbar;
 
             Context = this;
-            UsbManager = (UsbManager)Context.GetSystemService(UsbService);
+            UsbManager = (UsbManager)GetSystemService(UsbService);
             PendingIntent = PendingIntent.GetBroadcast(Context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+            //CreateConnectionUSB();
             CheckPermissions();
 
             base.OnCreate(savedInstanceState);
@@ -59,6 +60,13 @@ namespace PrinterThermal.Droid
                     UsbManager.RequestPermission(device, PendingIntent);
                 }
             }
+        }
+
+        public static void CreateConnectionUSB()
+        {
+            PendingIntent = PendingIntent.GetBroadcast(Context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+            IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+            Context.RegisterReceiver(new UsbReceiver(), filter);
         }
 
         private void CheckPermissions()

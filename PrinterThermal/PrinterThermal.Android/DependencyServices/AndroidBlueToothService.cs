@@ -4,15 +4,11 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(AndroidBlueToothService))]
 namespace PrinterThermal.Droid.DependencyServices
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
-    using Android.App;
     using Android.Bluetooth;
     using Android.Content;
-    using Android.Widget;
     using Java.Util;
     using PrinterThermal.DependencyServices;
 
