@@ -1,11 +1,13 @@
 ﻿namespace PrinterThermal.DependencyServices
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+
     public interface IUSBService
     {
         IList<string> GetDeviceList();
 
-        void ConnectAndSend(int productId, int vendorId);
+        Task ConnectAndSend(int productId, int vendorId);
 
         void CreateConnection();
 

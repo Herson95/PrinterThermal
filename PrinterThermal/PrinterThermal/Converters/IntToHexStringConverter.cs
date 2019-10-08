@@ -15,7 +15,7 @@
             bool canConvert = int.TryParse(splits[0], out num);
             if (canConvert)
             {
-                return $"USB:{int.Parse(splits[0]).ToString("X2")}:{int.Parse(splits[1]).ToString("X2")}";
+                return $"USB:{int.Parse(splits[1]).ToString("X4")}:{int.Parse(splits[0]).ToString("X4")}";
             }
             return values;
         }

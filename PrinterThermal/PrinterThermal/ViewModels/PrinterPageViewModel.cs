@@ -252,7 +252,7 @@
                     var c = SelectedDevice.DisplayName.Split(' ');
                     var vendorID = int.Parse(c[0]);
                     var productID = int.Parse(c[1]);
-                    uSBService.ConnectAndSend(productID, vendorID);
+                    await uSBService.ConnectAndSend(productID, vendorID);
                     IsEnabledButtons = true;
                     return;
                 }
